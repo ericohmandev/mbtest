@@ -5,7 +5,12 @@ This readme is more of a notebook on how this solution was done more then a comm
 ```sh
 make run_pipeline
 ```
-This will export the data into a big json file.
+
+Running this will download all files, scrape the sites, transform and join the data, into the resulting file:
+```sh
+result.json
+```
+Which is stored in this repo.
 
 ## Background
 The goal of the assignment is to create a dataset of the companies that are relevant to EQT. 
