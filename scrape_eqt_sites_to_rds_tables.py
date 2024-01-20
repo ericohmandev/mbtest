@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import re
 import pandas as pd
 from common import clean_url, store_data_to_rds
+import warnings
+warnings.filterwarnings("ignore")
 
 
 '''
@@ -53,16 +55,17 @@ def scrape_eqt_url_for_company_homepage_url(company_name):
 
 
 def scrape_portfolio_website(url,is_divestment):
+	print(f"Scraping data from {url}")
 	response = requests.get(url)
 	soup = BeautifulSoup(response.text, 'html.parser')
 	repeating_elements = soup.find_all('span', class_='inline-block')
 	result = []
 	for element in repeating_elements:
 		data = parse_json_from_container(element)
-		print(data)
 		if data:
 			data["is_divestment"]=is_divestment
 			result.append(data)
+	print(f"Scraping done, data for {str(len(result))} companies extracted")
 	return result
 
 
@@ -117,7 +120,3 @@ def scrape_eqt_websites_to_dataframe():
 if __name__ == "__main__":
 	scraped_data_df = scrape_eqt_websites_to_dataframe()
 	store_data_to_rds(scraped_data_df, "portfolio")
-
-
-
-

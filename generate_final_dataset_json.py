@@ -1,10 +1,13 @@
 from collections import defaultdict
 import json
-from common import cursor
+from common import cursor, conn
+import warnings
+warnings.filterwarnings("ignore")
 
 
 
 def create_tables():
+	print("Creating tables")
 	with open('queries/create_dataset.sql', 'r') as file:
 	    sql_queries = file.read()
 	queries = sql_queries.split(';')
@@ -39,6 +42,7 @@ def extract_funding_data():
 
 if __name__ == "__main__":
 	create_tables()
+	print("Enriching data and saving output")
 	base_data = create_base_dictionary()
 	funding_data = extract_funding_data()
 	for data in base_data:
@@ -46,3 +50,4 @@ if __name__ == "__main__":
 	conn.close()
 	with open("result.json", 'w') as json_file:
 		json.dump(base_data, json_file, indent=2)
+	print("Data saved to result.json")

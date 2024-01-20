@@ -1,17 +1,24 @@
 import pandas as pd
 from common import clean_url, store_data_to_rds
+import io, requests, gzip
+import warnings
+warnings.filterwarnings("ignore")
+
+FUNDING_DATA_URL = "https://storage.googleapis.com/motherbrain-external-test/interview-test-funding.json.gz"
+ORGANISATION_DATA_URL = "https://storage.googleapis.com/motherbrain-external-test/interview-test-org.json.gz"
+
+def load_data_from_url_to_df(url):
+	print(f"Downloading data from {url} into dataframe")
+	response = requests.get(url)
+	with gzip.GzipFile(fileobj=io.BytesIO(response.content), mode='rb') as decompressed_file:
+		df = pd.read_json(decompressed_file, lines=True)
+	return df
 
 
-#Load the files into pandas format
-funding_df = pd.read_json('data/interview-test-funding.json.gz', lines=True)
-organisation_df = pd.read_json('data/interview-test-org.json.gz', lines=True)
-store_data_to_rds(funding_df,"funding")
+if __name__ == "__main__":
+	funding_df = load_data_from_url_to_df(FUNDING_DATA_URL)
+	store_data_to_rds(funding_df,"funding")
 
-
-'''
-Since the homepage_url took on all sorts of formats, and it seemed to be the best
-key to join data with the portfolio companies, this needed to be cleaned before
-inserting into rds.
-'''
-organisation_df['cleaned_url'] = organisation_df['homepage_url'].apply(clean_url)
-store_data_to_rds(organisation_df, "organisation")
+	organisation_df = load_data_from_url_to_df(ORGANISATION_DATA_URL)
+	organisation_df['cleaned_url'] = organisation_df['homepage_url'].apply(clean_url)
+	store_data_to_rds(organisation_df, "organisation")
