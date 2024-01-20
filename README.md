@@ -55,10 +55,10 @@ At first glance, it seemed simple to enrich the base data with the gcs data, but
     - Examples, the homepage url https://www.iver.com/ maps to both Iver and Iver Sverige
 
 The strategy to solve for all of this was to:
-- From the EQT websites, dedeplicate companies and if a company is in both divested and in portfolio, it will be seen as not divested.
+- From the EQT websites, deduplicate companies and if a company is in both divested and in portfolio, it will be seen as not divested.
 - The only join that will be done is on the cleaned url of the website. If there are multiple hits, it will only take one row and the prioritoization will be the row with company name being equal, then number of investments, and then the length of the homepage_url.
 
-In general, there seems to be no way to really guarantee the correctness, so it really depends on what the pririty here is. If it should be 100% correct, I would not feel confident in doing an automatic pipeline, and instead going through the companies one by one to get the corresponding uuid if it exists for the company.
+In general, there seems to be no way to really guarantee the correctness, so it really depends on what the pririty here is. If it should be 100% correct, I would not feel confident in doing an automatic pipeline, and instead going through the companies one by one to get the corresponding uuid if it exists for the company. There are a bunch of different strategies with edge cases one could employ one could explore with more time.
 
 ## Final output
 Final output is the result.json file, the instructions said to store it in json / avro in any data storage, but for sake of simplicity this will just be a file here. If it were to be in a nosql database, like dynamodb, each element in this list could be stored there, and the suggested key could be the uuid.

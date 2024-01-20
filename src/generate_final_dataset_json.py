@@ -8,7 +8,7 @@ warnings.filterwarnings("ignore")
 
 def create_tables():
 	print("Creating tables")
-	with open('queries/create_dataset.sql', 'r') as file:
+	with open('src/queries/create_dataset.sql', 'r') as file:
 	    sql_queries = file.read()
 	queries = sql_queries.split(';')
 	for query in queries:
@@ -29,10 +29,10 @@ def extract_sql_to_json_list(file_name):
 
 
 def create_base_dictionary():
-	return extract_sql_to_json_list('queries/extract_base_dataset.sql')
+	return extract_sql_to_json_list('src/queries/extract_base_dataset.sql')
 
 def extract_funding_data():
-	dic = extract_sql_to_json_list('queries/extract_funding_data.sql')
+	dic = extract_sql_to_json_list('src/queries/extract_funding_data.sql')
 	funding_data = defaultdict(list)
 	for row in dic:
 		temp = dict(row)
