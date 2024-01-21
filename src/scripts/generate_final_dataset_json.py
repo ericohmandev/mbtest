@@ -2,10 +2,8 @@ from collections import defaultdict
 import json
 from common import cursor, conn
 
-
-
-def create_tables():
-	print("Creating tables")
+def create_refined_tables():
+	print("Creating refined tables from raw data")
 	with open('src/queries/create_dataset.sql', 'r') as file:
 	    sql_queries = file.read()
 	queries = sql_queries.split(';')
@@ -42,14 +40,19 @@ def extract_funding_data():
 		funding_data[row["org_uuid"]].append(temp)
 	return funding_data
 
+def filter_dict(data):
+	return {key: value for key, value in data.items() if value is not None}
+
 if __name__ == "__main__":
-	create_tables()
+	create_refined_tables()
 	print("Enriching data and saving output")
 	base_data = create_base_dictionary()
 	funding_data = extract_funding_data()
 	for data in base_data:
-		data["fundings"] = funding_data.get(data["uuid"],[])
+		data["fundings"] = funding_data.get(data["uuid"])
+
+	result = [filter_dict(data) for data in base_data]
 	conn.close()
 	with open("result.json", 'w') as json_file:
-		json.dump(base_data, json_file, indent=2,ensure_ascii=False)
+		json.dump(result, json_file, indent=2,ensure_ascii=False)
 	print("Data saved to result.json")

@@ -39,6 +39,8 @@ The data points saved for each company:
 - **url** - The raw url for the company listed on EQTs site
 - **cleaned_url** - The cleaned url, used mainly for joining
 - **is_divestment** - Has EQT divested from the company or not
+- **management** - Persons listed as management and what role they have
+- **board_of_directors** - Persons listed as board of directors and what role they have
 
 ## Exploring and enriching the data
 At first glance, it seemed simple to enrich the base data with the gcs data, but the biggest issue here seemed to be that there was no obvious way of joining the data with base data. Some examples:
@@ -58,7 +60,7 @@ The strategy to solve for all of this was to:
 - From the EQT websites, deduplicate companies and if a company is in both divested and in portfolio, it will be seen as not divested.
 - The only join that will be done is on the cleaned url of the website. If there are multiple hits, it will only take one row and the prioritoization will be the row with company name being equal, then number of investments, and then the length of the homepage_url.
 
-In general, there seems to be no way to really guarantee the correctness, so it really depends on what the pririty here is. If it should be 100% correct, I would not feel confident in doing an automatic pipeline, and instead going through the companies one by one to get the corresponding uuid if it exists for the company. There are a bunch of different strategies with edge cases one could employ one could explore with more time.
+In general, there seems to be no way to really guarantee the correctness, so it really depends on what the pririty here is. If it should be 100% correct, I would not feel confident in doing an automatic pipeline, and instead going through the companies one by one to get the corresponding uuid if it exists for the company. There are a bunch of different strategies with edge cases one could employ that could explore with more time.
 
 ## Final output
 Final output is the result.json file, the instructions said to store it in json / avro in any data storage, but for sake of simplicity this will just be a file here. If it were to be in a nosql database, like dynamodb, each element in this list could be stored there, and the suggested key could be the a cleaned version of the company name or some other generated company_id.

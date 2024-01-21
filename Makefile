@@ -11,5 +11,5 @@ install: venv
 
 run_pipeline: install
 	#venv/bin/python3 src/scripts/download_gcs_data_to_rds_tables.py
-	venv/bin/python3 src/scripts/scrape_eqt_sites_to_rds_tables.py
+	#venv/bin/python3 src/scripts/scrape_eqt_sites_to_rds_tables.py
 	venv/bin/python3 src/scripts/generate_final_dataset_json.py

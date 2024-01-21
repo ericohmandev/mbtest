@@ -2,8 +2,6 @@ from sqlalchemy import create_engine
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 import sqlite3
-import warnings
-warnings.filterwarnings("ignore")
 
 db_path = 'mbdatabase.db'
 sql_engine = create_engine(f'sqlite:///{db_path}')
