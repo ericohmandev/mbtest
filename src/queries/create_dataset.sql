@@ -4,7 +4,7 @@ WITH base AS
     (SELECT *,
             ROW_NUMBER() OVER ( PARTITION BY company ORDER BY cleaned_url is null,is_divestment) rn
               FROM portfolio)
-SELECT company,sector,country,fund,entry_year,exit_year,url,cleaned_url,is_divestment
+SELECT company,sector,country,fund,entry_year,exit_year,url,cleaned_url,is_divestment,management,board_of_directors,eqt_company_id
 FROM base
 WHERE rn=1;
 

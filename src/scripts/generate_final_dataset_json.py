@@ -1,8 +1,6 @@
 from collections import defaultdict
 import json
 from common import cursor, conn
-import warnings
-warnings.filterwarnings("ignore")
 
 
 
@@ -29,7 +27,11 @@ def extract_sql_to_json_list(file_name):
 
 
 def create_base_dictionary():
-	return extract_sql_to_json_list('src/queries/extract_base_dataset.sql')
+	data =  extract_sql_to_json_list('src/queries/extract_base_dataset.sql')
+	for row in data:
+		row["management"] = json.loads(row.get("management","null"))
+		row["board_of_directors"] = json.loads(row.get("board_of_directors","null"))
+	return data
 
 def extract_funding_data():
 	dic = extract_sql_to_json_list('src/queries/extract_funding_data.sql')
@@ -49,5 +51,5 @@ if __name__ == "__main__":
 		data["fundings"] = funding_data.get(data["uuid"],[])
 	conn.close()
 	with open("result.json", 'w') as json_file:
-		json.dump(base_data, json_file, indent=2)
+		json.dump(base_data, json_file, indent=2,ensure_ascii=False)
 	print("Data saved to result.json")

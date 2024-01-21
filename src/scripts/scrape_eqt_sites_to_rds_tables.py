@@ -3,8 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import pandas as pd
 from common import clean_url, store_data_to_rds
-import warnings
-warnings.filterwarnings("ignore")
+import json
 
 
 '''
@@ -23,7 +22,7 @@ url - The raw url for the company listed on EQTs site
 cleaned_url - The cleaned url, used mainly for joining
 '''
 
-def transform_company_name_to_eqt_url(company_name):
+def get_company_id(company_name):
 	company_name = company_name.lower()
 	company_name = company_name.replace("ö","oe")
 	company_name = company_name.replace("å","a")
@@ -36,13 +35,26 @@ def transform_company_name_to_eqt_url(company_name):
 
 	# Lowercase the string
 	cleaned_string = cleaned_string.lower()
+	return cleaned_string	
 
-	return f'https://eqtgroup.com/current-portfolio/{cleaned_string}'
 
-def scrape_eqt_url_for_company_homepage_url(company_name):
-	url = transform_company_name_to_eqt_url(company_name)
-	response = requests.get(url)
-	soup = BeautifulSoup(response.text, 'html.parser')
+def transform_company_name_to_eqt_url(company_name):
+	return f'https://eqtgroup.com/current-portfolio/{get_company_id(company_name)}'
+
+def get_section_from_company_site(soup, section_name):
+	result = []
+	section = soup.find('h3', text=section_name)
+	if section:
+		section = section.find_next("ul")
+		for li in section.find_all("li"):
+			role = li.find('div', class_='flex-1 font-light')
+			name = li.find('div', class_='flex-1 font-medium')
+			if role and name:
+				result.append({'role': role.text.strip(), 'name': name.text.strip()})
+	return result if result else None
+
+
+def extract_company_homepage_url(soup):
 	web_elements = soup.find_all('li', class_='flex border-b border-neutral-lighter py-7')
 	for web_element in web_elements:
 		# Check if the structure matches the desired one
@@ -52,6 +64,18 @@ def scrape_eqt_url_for_company_homepage_url(company_name):
 			if href_value:
 				return href_value
 	return None
+
+
+def scrape_eqt_company_for_data(company_name):
+	url = transform_company_name_to_eqt_url(company_name)
+	response = requests.get(url)
+	soup = BeautifulSoup(response.text, 'html.parser')
+	url = extract_company_homepage_url(soup)
+	board_of_directors = get_section_from_company_site(soup, "Board of directors")
+	management = get_section_from_company_site(soup, "Management")
+	return {"url" : url, "board_of_directors": board_of_directors,"management":management}
+
+
 
 
 def scrape_portfolio_website(url,is_divestment):
@@ -69,45 +93,23 @@ def scrape_portfolio_website(url,is_divestment):
 	return result
 
 
+
 def parse_json_from_container(element):
 	company_name = element.text.strip()
 	parent_container = element.find_parent('li', class_='flex flex-col border-t border-neutral-light cursor-pointer sm:cursor-default')
 	if parent_container:
-		string = parent_container.text
-		# Pattern for company name
-		company_pattern = re.compile(r'(.*?)Sector')
-		company_match = company_pattern.search(string)
-		company_name = company_match.group(1).strip() if company_match else None
+		company_name = parent_container.find('span', class_='inline-block').text.strip()
+		sector = parent_container.find('span', class_='font-medium', text='Sector').find_next('span').text.strip()
+		country = parent_container.find('span', class_='font-medium', text='Country').find_next('span').text.strip()
+		fund = parent_container.find('span', class_='font-medium', text='Fund').find_next('a', class_='text-primary font-medium').text.strip()
+		entry_year = parent_container.find('span', class_='font-medium', text='Entry').find_next('span').text.strip()
+		exit_year = parent_container.find('span', class_='font-medium', text='Exit').find_next('span').text.strip() if parent_container.find('span', class_='font-medium', text='Exit') else None
 
-		# Pattern for sector
-		sector_pattern = re.compile(r'Sector(.*?)Country')
-		sector_match = sector_pattern.search(string)
-		sector = sector_match.group(1).strip() if sector_match else None
-
-		# Pattern for country
-		country_pattern = re.compile(r'Country(.*?)Fund')
-		country_match = country_pattern.search(string)
-		country = country_match.group(1).strip() if country_match else None
-
-		# Pattern for fund
-		fund_pattern = re.compile(r'Fund(.*?)Entry')
-		fund_match = fund_pattern.search(string)
-		fund = fund_match.group(1).strip() if fund_match else None
-
-		# Pattern for entry year
-		entry_year_pattern = re.compile(r'Entry(\d{4})(?:Exit|$)')
-		entry_year_match = entry_year_pattern.search(string)
-		entry_year = entry_year_match.group(1).strip() if entry_year_match else None
-
-		# Pattern for exit year (always after entry)
-		exit_year_pattern = re.compile(r'Exit(\d{4})')
-		exit_year_match = exit_year_pattern.search(string)
-		exit_year = exit_year_match.group(1).strip() if exit_year_match else None
-
-		url = scrape_eqt_url_for_company_homepage_url(company_name)
+		eqt_company_website_data = scrape_eqt_company_for_data(company_name)
+		url = eqt_company_website_data.get("url")
 		cleaned_url = clean_url(url)
-
-		return {"company":company_name,"sector":sector,"country":country,"fund":fund,"entry_year":entry_year,"exit_year":exit_year, "url":url, "cleaned_url":cleaned_url}
+		company_id = get_company_id(company_name)
+		return {"eqt_company_id":company_id,"company":company_name,"sector":sector,"country":country,"fund":fund,"entry_year":entry_year,"exit_year":exit_year, "url":url, "cleaned_url":cleaned_url,"board_of_directors":json.dumps(eqt_company_website_data.get("board_of_directors"),ensure_ascii=False),"management":json.dumps(eqt_company_website_data.get("management"),ensure_ascii=False)}
 
 
 def scrape_eqt_websites_to_dataframe():
