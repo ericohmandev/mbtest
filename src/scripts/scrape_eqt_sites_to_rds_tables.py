@@ -25,7 +25,7 @@ def get_eqt_company_url_from_company_name(company_name):
 
 def get_people_data_from_eqt_company_site(soup, section_name):
 	result = []
-	section = soup.find('h3', text=section_name)
+	section = soup.find('h3', string=section_name)
 	if section:
 		section = section.find_next("ul")
 		for li in section.find_all("li"):
@@ -38,7 +38,7 @@ def get_people_data_from_eqt_company_site(soup, section_name):
 def extract_company_homepage_url_from_eqt_company_site(soup):
 	web_elements = soup.find_all('li', class_='flex border-b border-neutral-lighter py-7')
 	for web_element in web_elements:
-		if web_element.find('span', text='Web') and web_element.find('a', class_='transition-hover hover:opacity-hover focus:opacity-hover focus:outline-none text-primary'):
+		if web_element.find('span', string='Web') and web_element.find('a', class_='transition-hover hover:opacity-hover focus:opacity-hover focus:outline-none text-primary'):
 			href_value = web_element.find('a')['href']
 			if href_value:
 				return href_value
@@ -75,11 +75,11 @@ def parse_company_data_from_html_element(element):
 	parent_container = element.find_parent('li', class_='flex flex-col border-t border-neutral-light cursor-pointer sm:cursor-default')
 	if parent_container:
 		company_name = parent_container.find('span', class_='inline-block').text.strip()
-		sector = parent_container.find('span', class_='font-medium', text='Sector').find_next('span').text.strip()
-		country = parent_container.find('span', class_='font-medium', text='Country').find_next('span').text.strip()
-		fund = parent_container.find('span', class_='font-medium', text='Fund').find_next('a', class_='text-primary font-medium').text.strip()
-		entry_year = parent_container.find('span', class_='font-medium', text='Entry').find_next('span').text.strip()
-		exit_year = parent_container.find('span', class_='font-medium', text='Exit').find_next('span').text.strip() if parent_container.find('span', class_='font-medium', text='Exit') else None
+		sector = parent_container.find('span', class_='font-medium', string='Sector').find_next('span').text.strip()
+		country = parent_container.find('span', class_='font-medium', string='Country').find_next('span').text.strip()
+		fund = parent_container.find('span', class_='font-medium', string='Fund').find_next('a', class_='text-primary font-medium').text.strip()
+		entry_year = parent_container.find('span', class_='font-medium', string='Entry').find_next('span').text.strip()
+		exit_year = parent_container.find('span', class_='font-medium', string='Exit').find_next('span').text.strip() if parent_container.find('span', class_='font-medium', string='Exit') else None
 		company_id = get_company_id_from_name(company_name)
 		return {"eqt_company_id":company_id,"company":company_name,"sector":sector,"country":country,"fund":fund,"entry_year":entry_year,"exit_year":exit_year}
 

@@ -12,6 +12,12 @@ result.json
 ```
 Which is stored in this repo.
 
+## Run tests
+```sh
+make run_tests
+```
+
+
 ## Background
 The goal of the assignment is to create a dataset of the companies that are relevant to EQT. 
 The base dataset is given by scraping the companies at EQTs website
