@@ -1,4 +1,6 @@
 # EQT Pipeline assignment
+The assignment is in this repo, read assignment.pdf
+
 This readme is a notebook on how the solution was done, not a common readme. To run the pipeline, all you need to do is read the "Run the solution" part below, the rest of the readme is around the process.
 
 ## Run the solution
