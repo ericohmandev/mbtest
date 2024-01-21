@@ -1,12 +1,12 @@
 # EQT Pipeline assignment
-This readme is more of a notebook on how this solution was done more then a common readme. To run the pipeline, all you need to do is read the "Run the solution" part below, the rest of the readme is around the process.
+This readme is a notebook on how the solution was done, not a common readme. To run the pipeline, all you need to do is read the "Run the solution" part below, the rest of the readme is around the process.
 
 ## Run the solution
 ```sh
 make run_pipeline
 ```
 
-Running this will download all files, scrape the sites, transform and join the data, into the resulting file:
+Running this will download all files, scrape the sites, transform and join the data into the resulting file:
 ```sh
 result.json
 ```
@@ -31,7 +31,7 @@ The data we have to enrich these 400 companies are given from the datasets in gc
 - interview-test-org.json.gz
 
 ## Scraping the data
-This scraping script goes into the EQT portfolio sites, and for each company stores information.
+The scraping script goes into the EQT portfolio sites, and for each company stores information.
 In order to get the url of the website, which is stored within a specific url for the company at EQT,
 the script also scrapes that specific site and saves the url. 
 
@@ -64,9 +64,9 @@ At first glance, it seemed simple to enrich the base data with the gcs data, but
 
 The strategy to solve for all of this was to:
 - From the EQT websites, deduplicate companies and if a company is in both divested and in portfolio, it will be seen as not divested.
-- The only join that will be done is on the cleaned url of the website. If there are multiple hits, it will only take one row and the prioritoization will be the row with company name being equal, then number of investments, and then the length of the homepage_url.
+- The only key that will be used to join the datasets, will be the cleaned url. If there are multiple hits on that join, it will only take one row and the prioritoization will be the row with the company name being equal.
 
-In general, there seems to be no way to really guarantee the correctness, so it really depends on what the pririty here is. If it should be 100% correct, I would not feel confident in doing an automatic pipeline, and instead going through the companies one by one to get the corresponding uuid if it exists for the company. There are a bunch of different strategies with edge cases one could employ that could explore with more time.
+In general, there seems to be no way to really guarantee the correctness when joining these datasets, so it really depends on what the end goal here is. If it should be 100% correct, then this could probably not be done in an automatic pipeline with these datasets. Instead there would need to be some manual work and go through the companies one by one to get the corresponding uuid if it exists for the company. There are a bunch of different strategies with edge cases one could employ that could explore with more time.
 
 ## Final output
 Final output is the result.json file, the instructions said to store it in json / avro in any data storage, but for sake of simplicity this will just be a file here. If it were to be in a nosql database, like dynamodb, each element in this list could be stored there, and the suggested key could be the a cleaned version of the company name or some other generated company_id.
